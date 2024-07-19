@@ -1,14 +1,22 @@
+import OpenAI from "openai";
 import * as cheerio from "cheerio";
 import * as tough from "tough-cookie";
-import { Injectable } from "@nestjs/common";
+import { ConfigType } from "@nestjs/config";
+import envConfig from "src/config/env.config";
 import { wrapper } from "axios-cookiejar-support";
+import { Inject, Injectable } from "@nestjs/common";
 import axios, { AxiosInstance, AxiosResponse } from "axios";
 
 @Injectable()
 export default class CrawlerService {
+  private openai: OpenAI;
+  private crawlURLs: string[];
   private axiosInstance: AxiosInstance;
 
-  constructor() {
+  constructor(
+    @Inject(envConfig.KEY)
+    private readonly envConfigService: ConfigType<typeof envConfig>,
+  ) {
     this.axiosInstance = wrapper(
       axios.create({
         withCredentials: true,
@@ -19,6 +27,9 @@ export default class CrawlerService {
         },
       }),
     );
+
+    this.openai = new OpenAI({ apiKey: envConfigService.OPENAI_API_KEY });
+    this.crawlURLs = envConfigService.CRAWL_URLS.split(",");
   }
 
   private async fetchWithRedirects(
@@ -44,52 +55,34 @@ export default class CrawlerService {
     throw new Error("Maximum number of redirects exceeded");
   }
 
-  async crawl(): Promise<JobProps[]> {
+  async crawl(): ReturnType<typeof this.extractData> {
     const result: JobProps[] = [];
 
-    let offsetValue: number = 15;
-    const offsetJump: number = 15;
-    const maxOffset: number = 2000;
-
-    while (offsetValue <= maxOffset) {
+    for (const url of this.crawlURLs) {
+      console.log("Current URL -", url);
       try {
-        console.log(`Current Offset - ${offsetValue}`);
+        const data = await this.fetchWithRedirects(url);
+        const $ = cheerio.load(data);
 
-        const data = await this.fetchWithRedirects(
-          `https://remoteok.com/?&action=get_jobs&offset=${offsetValue}`,
-        );
-
-        const $ = cheerio.load(`<table>${data.trim()}</table>`);
-
-        const extractedData = await this.extractData($);
-        if (extractedData.length === 0) break;
-
-        result.push(...extractedData);
-        offsetValue += offsetJump;
-
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        result.push(...(await this.extractData($)));
       } catch (error) {
-        console.error(`Error fetching data:`, error);
-        offsetValue += offsetJump;
-        continue;
+        console.error(`Error fetching data from ${url}:`, error);
+        throw error;
       }
     }
-
-    console.log(
-      `Extracted ${result.length} jobs with current offset value of ${offsetValue}`,
-    );
 
     return result;
   }
 
   private async extractData($: cheerio.CheerioAPI): Promise<JobProps[]> {
-    const jobs: JobProps[] = [];
+    const jobs = [];
     const jobElements = $("tr.job");
 
     for (const elementSource of jobElements.toArray()) {
       const job = this.extractJob($, elementSource);
       if (job) {
-        jobs.push(job);
+        const jobDetails = await this.fetchJobDetails(job);
+        jobs.push({ ...job, ...jobDetails });
       }
     }
 
@@ -99,65 +92,103 @@ export default class CrawlerService {
   private extractJob(
     $: cheerio.CheerioAPI,
     elementSource: cheerio.Element,
-  ): JobProps {
+  ): PrimaryJobProps {
     const el = $(elementSource);
 
-    const scriptTag = el.find('script[type="application/ld+json"]').html();
-    if (!scriptTag) {
-      console.log("No script tag found");
-      return null;
+    const url = el.attr("data-url");
+    const dataID = el.attr("data-id");
+    const dataSlug = el.attr("data-slug");
+    const companyImage = el
+      .find("td.image.has-logo > a > img.logo")
+      .attr("data-src");
+    const jobTitle = el
+      .find('td.company > a[itemprop="url"] > h2[itemprop="title"]')
+      .text()
+      .trim();
+    const companyTitle = el
+      .find('span[itemprop="hiringOrganization"] > h3[itemprop="name"]')
+      .text()
+      .trim();
+    const tags = el
+      .find(".tags .tag")
+      .map((_, el) => $(el).text().trim())
+      .get();
+
+    if (jobTitle && companyTitle && url) {
+      return {
+        tags,
+        dataID,
+        dataSlug,
+        jobTitle,
+        companyImage,
+        companyTitle,
+        url: `https://remoteok.com${url}`,
+      };
     }
+    return null;
+  }
 
-    const jobData = JSON.parse(scriptTag);
+  private async fetchJobDetails(
+    job: PrimaryJobProps,
+  ): Promise<SecondaryJobProps> {
+    const { dataID, url } = job;
 
-    const skillsAndTags =
-      el
-        .find(".tags .tag")
-        .map((_, tag) => $(tag).text().trim())
-        .toArray() || [];
+    try {
+      const { data } = await this.axiosInstance.get(url);
+      const $ = cheerio.load(data);
 
-    const applicantLocationRequirements = Array.isArray(
-      jobData.applicantLocationRequirements,
-    )
-      ? jobData.applicantLocationRequirements
-          .map((location: any) => location?.name)
-          .join(", ")
-      : jobData.applicantLocationRequirements?.name;
+      const parentEl = $(`tr.expand.expand-${dataID} div.description`);
 
-    const job: JobProps = {
-      datePosted: jobData.datePosted,
-      description: jobData.description || null,
-      baseSalary_minValue: jobData.baseSalary.value?.minValue || null,
-      baseSalary_maxValue: jobData.baseSalary.value?.maxValue || null,
-      employmentType: jobData.employmentType || null,
-      industry: jobData.industry || null,
-      jobLocationType: jobData.jobLocationType || null,
-      applicantLocationRequirements: applicantLocationRequirements,
-      title: jobData.title || null,
-      image: jobData.hiringOrganization.logo?.url || null,
-      occupationalCategory: jobData.occupationalCategory || null,
-      workHours: jobData.workHours || null,
-      validThrough: jobData.validThrough || null,
-      hiringOrganization_name: jobData.hiringOrganization?.name || null,
-      hiringOrganization_url: jobData.hiringOrganization?.url || null,
-      hiringOrganization_logo: jobData.hiringOrganization?.logo?.url || null,
-      directApply: jobData.directApply || null,
-      data_slug: el.attr("data-slug") || null,
-      data_url: el.attr("data-url") || null,
-      data_company: jobData.hiringOrganization?.name || null,
-      data_id: el.attr("data-id") || null,
-      data_search:
-        el.attr("data-search").split(" [")[0] ||
-        el.attr("data-search").split(" {")[0] ||
-        null,
-      tags: skillsAndTags,
-      skills: skillsAndTags,
-      jobBenefits: jobData.jobBenefits || null,
-      applyLink: $(
-        `a.button.action-apply[data-job-id="${el.attr("data-id")}"]`,
-      ).attr("href"),
-    };
+      const secondaryParentEl = $(parentEl).find("div.html, div.markdown");
+      const secondaryParentElHtml = secondaryParentEl.html();
 
-    return job;
+      const companyLink = $(parentEl)
+        .find(`div.company_profile > p > a`)
+        .attr("href");
+      const applyLink = $(
+        `a.button.action-apply[data-job-id="${dataID}"]`,
+      ).attr("href");
+      const views = $(parentEl).find(`p:contains("👀")`).text().trim();
+      const applied = $(parentEl).find(`p:contains("✅")`).text().trim();
+
+      const {
+        choices: [gptResponse],
+      } = await this.openai.chat.completions.create({
+        messages: [
+          {
+            role: "user",
+            content: `${secondaryParentElHtml}\n\nGo through this HTML markup and output a new HTML markup without any extra text and info with this structure: 1. Job Description (make a <div> with class name as job-description and place a <p> tag inside this div and place all the content about job description inside this <p> tag)\n2. Responsibilities (make a <div> with class name as job-responsibilities and place a <p> tag inside this div and place all the content about job responsibilities inside this <p> tag)\n3. Requirements (make a <div> with class name as job-requirements and place a <p> tag inside this div and place all the content about job requirements inside this <p> tag)\n4. Tech Stack (make a <div> with class name as job-tech-stack and place a <p> tag inside this div and place all the content about job tech stack inside this <p> tag)\n5. Benefits (make a <div> with class name as job-benefits and place a <p> tag inside this div and place all the content about job benefits inside this <p> tag)\n6. Salary (make a <div> with class name as job-salary and place a <p> tag inside this div and place all the content about job salary inside this <p> tag)\n\nPS: If any of the mentioned section is not available in the given markup, then do not produce the its resultant markup, skip it. And do no mention any kind of heading of the section inside <p> tag, just write its content.`,
+          },
+        ],
+        model: "gpt-4-turbo",
+      });
+
+      const $details = cheerio.load(gptResponse.message.content);
+
+      const description = $details("div.job-description > p").text().trim();
+      const responsibilities = $details("div.job-responsibilities > p")
+        .text()
+        .trim();
+      const requirements = $details("div.job-requirements > p").text().trim();
+      const techStack = $details("div.job-tech-stack > p").text().trim();
+      const benefits = $details("div.job-benefits > p").text().trim();
+      const salary = $details("div.job-salary > p").text().trim();
+
+      return {
+        description,
+        responsibilities,
+        requirements,
+        techStack,
+        benefits,
+        salary,
+        companyLink,
+        applied,
+        views,
+        applyLink: `https://remoteok.com${applyLink}`,
+      };
+    } catch (error) {
+      console.error(`Error fetching job details from ${url}:`, error);
+      return {};
+    }
   }
 }
