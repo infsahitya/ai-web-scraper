@@ -1,73 +1,88 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+![Logo](https://socialify.git.ci/infsahitya/web-sage/image?description=1&descriptionEditable=Automated%20Intelligence%20%F0%9F%A4%96%20Perfected%20Extraction&forks=1&issues=1&language=1&logo=https%3A%2F%2Fwww.svgrepo.com%2Fshow%2F375527%2Fai-platform.svg&name=1&owner=1&pattern=Floating%20Cogs&pulls=1&stargazers=1&theme=Auto)
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+# Web Rake (AI Powered)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Web Sage is an innovative and powerful AI powered web scraping tool designed to extract and compile data from websites with unparalleled efficiency, precision and super enhanced data quality. Utilizing cutting-edge technologies like NestJS and Cheerio.
 
-## Installation
+It delves into the depths of nested tweb pages, seamlessly harvesting valuable information such as job descriptions, responsibilities, requirements, benefits, salaries, and tech stacks.
 
-```bash
-$ npm install
-```
 
-## Running the app
+## ✨ Features
+
+- AI Enhanced
+- Enriched Data Quality 
+- Customizable Scraping Patterns
+- Real-Time Data Processing
+- Robust Error Handling
+- Data Export Options
+
+
+## 🧑🏻‍🔬 Contributors
+
+- [Sahitya Pandey](https://github.com/infsahitya)
+
+
+## ⚙️ Installation
+
+Install crowdfunding-dapp with npm
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+  git clone https://github.com/infsahitya/web-sage.git
+  
+  cd ./web-sage
+  
+  npm install
 ```
 
-## Test
+Set Environment Variables
 
 ```bash
-# unit tests
-$ npm run test
+  # Create .env file in the root of your project directory
 
-# e2e tests
-$ npm run test:e2e
+  NODE_ENV="development"
 
-# test coverage
-$ npm run test:cov
+  OPENAI_API_KEY=<your-openai-api-key>
+
+  CRAWL_URLS=https://remoteok.com/remote-engineer-jobs,https://remoteok.com/remote-exec-jobs,https://remoteok.com/remote-senior-jobs,https://remoteok.com/remote-dev-jobs,https://remoteok.com/remote-finance-jobs
+
+```
+    
+## 🛠️ Run Locally
+
+Execute the following commands inside project directory.
+
+Install dependencies:
+
+```bash
+  npm install
 ```
 
-## Support
+Start the server:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+  npm run start:dev
+```
 
-## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## 🧪 Test
 
-## License
+To run tests, open an API Platform of your choice (Postman, Insomnia, any browser)
 
-Nest is [MIT licensed](LICENSE).
+```bash
+  curl 'http://localhost:3000/v1/crawler'
+```
+
+Inside project directory
+```bash
+  cd ./data
+  
+  # Check the latest created folder
+```
+
+
+## 🔦 Tech Stack
+
+Node, NestJS, OpenAI (GPT-4 Turbo Model) Cheerio, JSON2CSV, Axios
+
