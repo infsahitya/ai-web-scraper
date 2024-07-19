@@ -34,7 +34,7 @@ export default class CrawlerService {
 
   private async fetchWithRedirects(
     url: string,
-    maxRedirects = 10,
+    maxRedirects = 5,
   ): Promise<string> {
     let redirects = 0;
     let response: AxiosResponse<any>;
