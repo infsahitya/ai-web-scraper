@@ -1,10 +1,10 @@
 
-![Logo](https://socialify.git.ci/infsahitya/web-sage/image?description=1&descriptionEditable=Automated%20Intelligence%20%F0%9F%A4%96%20Perfected%20Extraction&forks=1&issues=1&language=1&logo=https%3A%2F%2Fwww.svgrepo.com%2Fshow%2F375527%2Fai-platform.svg&name=1&owner=1&pattern=Floating%20Cogs&pulls=1&stargazers=1&theme=Auto)
+![Logo](https://socialify.git.ci/infsahitya/ai-web-scraper/image?description=1&descriptionEditable=Automated%20Intelligence%20%F0%9F%A4%96%20Perfected%20Extraction&forks=1&issues=1&language=1&logo=https%3A%2F%2Fwww.svgrepo.com%2Fshow%2F375527%2Fai-platform.svg&name=1&owner=1&pattern=Floating%20Cogs&pulls=1&stargazers=1&theme=Auto)
 
 
-# Web Sage (AI Powered)
+# AI Web Scraper
 
-Web Sage is an innovative and powerful AI powered web scraping tool designed to extract and compile data from websites with unparalleled efficiency, precision and super enhanced data quality. Utilizing cutting-edge technologies like NestJS and Cheerio.
+AI Web Scraper is an innovative and powerful AI powered web scraping tool designed to extract and compile data from websites with unparalleled efficiency, precision and super enhanced data quality. Utilizing cutting-edge technologies like NestJS and Cheerio.
 
 It delves into the depths of nested web pages, seamlessly harvesting valuable information such as job descriptions, responsibilities, requirements, benefits, salaries, and tech stacks.
 
@@ -29,9 +29,9 @@ It delves into the depths of nested web pages, seamlessly harvesting valuable in
 Install crowdfunding-dapp with npm
 
 ```bash
-  git clone https://github.com/infsahitya/web-sage.git
+  git clone https://github.com/infsahitya/ai-web-scraper.git
   
-  cd ./web-sage
+  cd ./ai-web-scraper
   
   npm install
 ```
